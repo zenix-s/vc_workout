@@ -1,0 +1,97 @@
+@page "/exercise/{ExerciseId:int}"
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h3>@(exercise?.Name ?? "Cargando...")</h3>
+
+@if (exercise != null)
+{
+    <div class="card mb-3">
+        <div class="card-header">Nuevo Set</div>
+        <div class="card-body">
+            <CounterInput Label="Peso (kg)" @bind-Value="currentWeight" Step="2.5" />
+            <CounterInput Label="Reps" @bind-Value="currentReps" Step="1" />
+            <button class="btn btn-success mt-3 w-100" @onclick="SaveSet">Guardar Set</button>
+        </div>
+    </div>
+
+    <h4>Historial</h4>
+    @if (exercise.Sets.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Peso</th>
+                    <th>Reps</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var set in exercise.Sets.OrderByDescending(s => s.Date))
+                {
+                    <tr>
+                        <td>@set.Date.ToShortDateString()</td>
+                        <td>@set.Weight kg</td>
+                        <td>@set.Reps</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No hay registros aún.</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int ExerciseId { get; set; }
+
+    private Exercise? exercise;
+    private double currentWeight;
+    private int currentReps;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadExercise();
+        // Pre-fill with last values if available
+        var lastSet = exercise?.Sets.OrderByDescending(s => s.Date).FirstOrDefault();
+        if (lastSet != null)
+        {
+            currentWeight = lastSet.Weight;
+            currentReps = lastSet.Reps;
+        }
+        else
+        {
+            currentWeight = 20; // Default
+            currentReps = 10; // Default
+        }
+    }
+
+    private async Task LoadExercise()
+    {
+        exercise = await DbContext.Exercises
+            .Include(e => e.Sets)
+            .FirstOrDefaultAsync(e => e.Id == ExerciseId);
+    }
+
+    private async Task SaveSet()
+    {
+        if (exercise != null)
+        {
+            var newSet = new Set
+            {
+                ExerciseId = exercise.Id,
+                Weight = currentWeight,
+                Reps = currentReps,
+                Date = DateTime.Now
+            };
+
+            DbContext.Sets.Add(newSet);
+            await DbContext.SaveChangesAsync();
+            await LoadExercise(); // Refresh list
+        }
+    }
+}
