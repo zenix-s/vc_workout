@@ -1,9 +1,13 @@
 using vc_workout.api.Features;
+using vc_workout.infraestructure.Data;
+using vc_workout.shared.Entities;
 
 namespace vc_workout.api.Features.Exercises;
 
-public class CreateExercise : ISlice
+public class CreateExercise(WorkoutDbContext context) : ISlice
 {
+    private readonly WorkoutDbContext _context = context;
+
     public record CreateExerciseRequest(
         string Name
     );
@@ -19,8 +23,24 @@ public class CreateExercise : ISlice
             .WithName("Create exercise");
     }
 
-    public Task<IResult> HandleAsync(CreateExerciseRequest request)
+    public async Task<IResult> HandleAsync(CreateExerciseRequest request)
     {
-        throw new NotImplementedException();
+        var exercise = new Exercise
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Exercises.Add(exercise);
+        await _context.SaveChangesAsync();
+
+        var response = new CreateExerciseResponse(
+            exercise.Id,
+            exercise.Name
+        );
+
+        return Results.Created($"/api/exercises/{exercise.Id}", response);
     }
 }
+
