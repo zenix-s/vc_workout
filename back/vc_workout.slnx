@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="vc_workout.api/vc_workout.api.csproj" />
+  <Project Path="vc_workout.infraestructure/vc_workout.infraestructure.csproj" />
+  <Project Path="vc_workout.shared/vc_workout.shared.csproj" />
+</Solution>

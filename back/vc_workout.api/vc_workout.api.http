@@ -1,0 +1,6 @@
+@vc_workout.api_HostAddress = http://localhost:5157
+
+GET {{vc_workout.api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
