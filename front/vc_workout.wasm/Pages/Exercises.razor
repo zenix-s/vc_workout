@@ -1,0 +1,162 @@
+@page "/exercises"
+@using vc_workout.wasm.Services
+@using vc_workout.wasm.Models
+@inject ExerciseService ExerciseService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Exercises</PageTitle>
+
+<h1>Exercises</h1>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateForm">Create Exercise</button>
+</div>
+
+@if (_showCreateForm)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Create New Exercise</h5>
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" @bind="_newExerciseName" />
+            </div>
+            <button class="btn btn-success" @onclick="CreateExercise">Save</button>
+            <button class="btn btn-secondary" @onclick="HideCreateForm">Cancel</button>
+        </div>
+    </div>
+}
+
+@if (_isLoading)
+{
+    <p>Loading...</p>
+}
+else if (_exercises != null && _exercises.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var exercise in _exercises)
+            {
+                <tr>
+                    <td>@exercise.Id</td>
+                    <td>
+                        @if (_editingExerciseId == exercise.Id)
+                        {
+                            <input type="text" class="form-control" @bind="_editExerciseName" />
+                        }
+                        else
+                        {
+                            @exercise.Name
+                        }
+                    </td>
+                    <td>@exercise.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @if (_editingExerciseId == exercise.Id)
+                        {
+                            <button class="btn btn-sm btn-success" @onclick="() => SaveEdit(exercise.Id)">Save</button>
+                            <button class="btn btn-sm btn-secondary" @onclick="CancelEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-primary" @onclick="() => StartEdit(exercise.Id, exercise.Name)">Edit</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteExercise(exercise.Id)">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No exercises found. Create your first exercise!</p>
+}
+
+@code {
+    private List<Exercise>? _exercises;
+    private bool _isLoading = true;
+    private bool _showCreateForm = false;
+    private string _newExerciseName = string.Empty;
+    private int? _editingExerciseId;
+    private string _editExerciseName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadExercisesAsync();
+    }
+
+    private async Task LoadExercisesAsync()
+    {
+        _isLoading = true;
+        _exercises = await ExerciseService.GetAllAsync();
+        _isLoading = false;
+    }
+
+    private void ShowCreateForm()
+    {
+        _showCreateForm = true;
+        _newExerciseName = string.Empty;
+    }
+
+    private void HideCreateForm()
+    {
+        _showCreateForm = false;
+    }
+
+    private async Task CreateExercise()
+    {
+        if (!string.IsNullOrWhiteSpace(_newExerciseName))
+        {
+            await ExerciseService.CreateAsync(_newExerciseName);
+            _showCreateForm = false;
+            await LoadExercisesAsync();
+        }
+    }
+
+    private void StartEdit(int id, string name)
+    {
+        _editingExerciseId = id;
+        _editExerciseName = name;
+    }
+
+    private void CancelEdit()
+    {
+        _editingExerciseId = null;
+        _editExerciseName = string.Empty;
+    }
+
+    private async Task SaveEdit(int id)
+    {
+        if (!string.IsNullOrWhiteSpace(_editExerciseName))
+        {
+            await ExerciseService.UpdateAsync(id, _editExerciseName);
+            _editingExerciseId = null;
+            await LoadExercisesAsync();
+        }
+    }
+
+    private async Task DeleteExercise(int id)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this exercise?");
+        if (confirmed)
+        {
+            try
+            {
+                await ExerciseService.DeleteAsync(id);
+                await LoadExercisesAsync();
+            }
+            catch
+            {
+                // TODO: Show error toast - exercise might have sets
+            }
+        }
+    }
+}

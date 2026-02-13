@@ -1,0 +1,101 @@
+@page "/"
+@using vc_workout.wasm.Services
+@using vc_workout.wasm.Models
+@inject WorkoutStateService WorkoutState
+@inject StatsService StatsService
+@implements IDisposable
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Dashboard</h1>
+
+@if (_isLoading)
+{
+    <p>Loading...</p>
+}
+else if (_stats != null)
+{
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Workouts</h5>
+                    <p class="card-text display-4">@_stats.TotalWorkouts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Last Workout</h5>
+                    <p class="card-text">@(_stats.LastWorkoutDate?.ToString("dd/MM/yyyy") ?? "N/A")</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sets This Month</h5>
+                    <p class="card-text display-4">@_stats.SetsThisMonth</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Current Streak</h5>
+                    <p class="card-text display-4">@_stats.CurrentStreak</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        @if (WorkoutState.HasActiveWorkout)
+        {
+            <button class="btn btn-danger" @onclick="FinishWorkout">Finish Workout</button>
+            <p class="mt-2">Active workout ID: @WorkoutState.ActiveWorkoutId</p>
+        }
+        else
+        {
+            <button class="btn btn-primary" @onclick="StartWorkout">Start Workout</button>
+        }
+    </div>
+}
+
+@code {
+    private Stats? _stats;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await WorkoutState.InitializeAsync();
+        WorkoutState.OnChange += StateHasChanged;
+        await LoadStatsAsync();
+    }
+
+    private async Task LoadStatsAsync()
+    {
+        _isLoading = true;
+        _stats = await StatsService.GetStatsAsync();
+        _isLoading = false;
+    }
+
+    private async Task StartWorkout()
+    {
+        await WorkoutState.StartWorkoutAsync();
+        await LoadStatsAsync();
+    }
+
+    private async Task FinishWorkout()
+    {
+        await WorkoutState.FinishWorkoutAsync();
+        await LoadStatsAsync();
+    }
+
+    public void Dispose()
+    {
+        WorkoutState.OnChange -= StateHasChanged;
+    }
+}
+

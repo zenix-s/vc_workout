@@ -62,8 +62,9 @@ void RegisterSlices(IEndpointRouteBuilder endpointRouteBuilder)
 
     foreach (var sliceType in slices)
     {
-        // Resolve slice from DI container and map endpoints
-        var slice = (ISlice)app.Services.GetRequiredService(sliceType);
+        // Create scope to resolve slice and map endpoints
+        using var scope = app.Services.CreateScope();
+        var slice = (ISlice)scope.ServiceProvider.GetRequiredService(sliceType);
         slice.MapEndpoint(endpointRouteBuilder);
     }
 }

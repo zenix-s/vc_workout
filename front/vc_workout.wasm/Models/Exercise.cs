@@ -1,8 +1,8 @@
-namespace vc_workout.shared.Entities;
+namespace vc_workout.wasm.Models;
 
 public class Exercise
 {
     public int Id { get; set; }
-    public required string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 }

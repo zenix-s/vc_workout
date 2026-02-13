@@ -13,7 +13,7 @@ public class CreateExercise(WorkoutDbContext context) : ISlice
     );
 
     public record CreateExerciseResponse(
-        Guid Id,
+        int Id,
         string Name
     );
 
@@ -27,7 +27,6 @@ public class CreateExercise(WorkoutDbContext context) : ISlice
     {
         var exercise = new Exercise
         {
-            Id = Guid.NewGuid(),
             Name = request.Name,
             CreatedAt = DateTime.UtcNow
         };

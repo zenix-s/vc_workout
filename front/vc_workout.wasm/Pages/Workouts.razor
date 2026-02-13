@@ -1,0 +1,159 @@
+@page "/workouts"
+@using vc_workout.wasm.Services
+@using vc_workout.wasm.Models
+@inject WorkoutService WorkoutService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Workouts</PageTitle>
+
+<h1>Workouts</h1>
+
+@if (_isLoading)
+{
+    <p>Loading...</p>
+}
+else if (_pagedResult != null && _pagedResult.Items.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Sets</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var workout in _pagedResult.Items)
+            {
+                <tr>
+                    <td>@workout.Id</td>
+                    <td>@workout.Date.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        @if (workout.EndDate == null)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Completed</span>
+                        }
+                    </td>
+                    <td>@workout.SetCount</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => ViewDetails(workout.Id)">View</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteWorkout(workout.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            @for (int i = 1; i <= _pagedResult.TotalPages; i++)
+            {
+                var pageNum = i;
+                <li class="page-item @(pageNum == _currentPage ? "active" : "")">
+                    <a class="page-link" @onclick="() => LoadPage(pageNum)">@pageNum</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+else
+{
+    <p>No workouts found.</p>
+}
+
+@if (_selectedWorkout != null)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Workout Details</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDetails"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Date:</strong> @_selectedWorkout.Date.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Status:</strong> @(_selectedWorkout.EndDate == null ? "Active" : $"Completed at {_selectedWorkout.EndDate:dd/MM/yyyy HH:mm}")</p>
+                    
+                    @if (_selectedWorkout.Sets.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Exercise</th>
+                                    <th>Set #</th>
+                                    <th>Weight (KG)</th>
+                                    <th>Reps</th>
+                                    <th>RPE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var set in _selectedWorkout.Sets.OrderBy(s => s.CreatedAt))
+                                {
+                                    <tr>
+                                        <td>@set.ExerciseName</td>
+                                        <td>@set.SetNumber</td>
+                                        <td>@set.Weight</td>
+                                        <td>@set.Reps</td>
+                                        <td>@set.Rpe</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No sets recorded for this workout.</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDetails">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private PagedResult<WorkoutListItem>? _pagedResult;
+    private bool _isLoading = true;
+    private int _currentPage = 1;
+    private int _pageSize = 10;
+    private WorkoutDetail? _selectedWorkout;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPage(_currentPage);
+    }
+
+    private async Task LoadPage(int page)
+    {
+        _isLoading = true;
+        _currentPage = page;
+        _pagedResult = await WorkoutService.GetAllAsync(_currentPage, _pageSize);
+        _isLoading = false;
+    }
+
+    private async Task ViewDetails(int workoutId)
+    {
+        _selectedWorkout = await WorkoutService.GetByIdAsync(workoutId);
+    }
+
+    private void CloseDetails()
+    {
+        _selectedWorkout = null;
+    }
+
+    private async Task DeleteWorkout(int id)
+    {
+        // TODO: Add JSInterop confirm dialog
+        await WorkoutService.DeleteAsync(id);
+        await LoadPage(_currentPage);
+    }
+}
