@@ -1,0 +1,38 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# IDE and editor files
+**/.vs/
+**/.vscode/
+**/.idea/
+*.user
+*.suo
+*.swp
+*~
+
+# Database files
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# NuGet packages
+**/packages/
+**/*.nupkg
+
+# Logs
+**/logs/
+**/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md

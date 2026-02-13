@@ -215,3 +215,7 @@ project.lock.json
 
 # OpenCode
 .opencode/
+
+# Node modules (for Tailwind CSS)
+node_modules/
+package-lock.json

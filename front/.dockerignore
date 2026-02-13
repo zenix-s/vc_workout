@@ -1,0 +1,41 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# Node modules and npm artifacts
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# IDE and editor files
+**/.vs/
+**/.vscode/
+**/.idea/
+*.user
+*.suo
+*.swp
+*~
+
+# NuGet packages
+**/packages/
+**/*.nupkg
+
+# Logs
+**/logs/
+**/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md

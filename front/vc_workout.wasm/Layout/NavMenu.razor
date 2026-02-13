@@ -1,39 +1,37 @@
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">VC Workout</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<!-- Sidebar Navigation -->
+<nav class="w-64 bg-gradient-to-b from-blue-900 to-purple-900 text-white flex flex-col">
+    <!-- Logo/Brand -->
+    <div class="p-6 border-b border-blue-700">
+        <h1 class="text-2xl font-bold">VC Workout</h1>
     </div>
-</div>
-
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="exercises">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Exercises
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="workouts">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Workouts
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    
+    <!-- Navigation Links -->
+    <div class="flex-1 py-6">
+        <NavLink href="" Match="NavLinkMatch.All" 
+                 class="flex items-center px-6 py-3 hover:bg-blue-800 transition-colors duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            Dashboard
+        </NavLink>
+        
+        <NavLink href="exercises" 
+                 class="flex items-center px-6 py-3 hover:bg-blue-800 transition-colors duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Exercises
+        </NavLink>
+        
+        <NavLink href="workouts" 
+                 class="flex items-center px-6 py-3 hover:bg-blue-800 transition-colors duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Workouts
+        </NavLink>
+    </div>
+</nav>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
 }
